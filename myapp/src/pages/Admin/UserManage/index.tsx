@@ -1,8 +1,9 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { ProTable, TableDropdown } from '@ant-design/pro-components';
-import { useRef } from 'react';
-import {searchUsers} from "@/services/ant-design-pro/api";
-import {Image} from "antd";
+import {ProTable, TableDropdown} from '@ant-design/pro-components';
+import {useRef, useState} from 'react';
+import {register, searchUsers} from "@/services/ant-design-pro/api";
+import {Button, Form, Image, Input, Modal} from "antd";
+import {useForm} from "antd/es/form/Form";
 export const waitTimePromise = async (time: number = 100) => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -125,13 +126,83 @@ const columns: ProColumns<API.CurrentUser>[] = [
   },
 ];
 
+// type newUser = {
+//   username: String;
+//   userAccount: String;
+//   userPassword: String;
+// }
+
 export default () => {
   const actionRef = useRef<ActionType>();
+  const [tableData, setTableData] = useState([]);
+
+  /*------------------  用户新增弹窗相关  ---------------- */
+  // 设置弹窗开关变量
+  const [isModalOpen, setIsModalOpen] = useState(Boolean)
+  // 新增用户的form
+  const [newUserForm] = useForm()
+  // 打开弹窗
+  const openNewUserModal = () =>{
+    setIsModalOpen(true)
+  }
+  // 保存新用户
+  const handleOkNewUser = async () => {
+    // const values = await newUserForm.validateFields();
+    // 字段校验
+    newUserForm.validateFields()
+      .then(async (data) => {
+          data['checkPassword'] = data['userPassword']
+          // 注册新用户
+          const id = await register({...data, })
+          // 重新获取数据渲染
+          await refreshTable()
+          setIsModalOpen(false)
+          newUserForm.resetFields()
+        }
+      )
+      .catch((error) => {
+        console.log('error:', error);
+      })
+
+  }
+  // 取消提交
+  const handleCancelNewUser = async () => {
+    const newDatas = await searchUsers()
+    setTableData(newDatas)
+    setIsModalOpen(false)
+    newUserForm.resetFields()
+  }
+
+  async function refreshTable(){
+    const newDatas = await searchUsers()
+    setTableData(newDatas)
+  }
+
   return (
+    <>
+      <div><Button onClick={openNewUserModal}>新增</Button></div>
+      {/* 用户新增弹窗 */}
+      <Modal title="新增用户" open={isModalOpen} onOk={handleOkNewUser} onCancel={handleCancelNewUser}>
+        <Form form={newUserForm}>
+          <Form.Item name="username" label="用户名">
+            <Input placeholder="请输入用户名" />
+          </Form.Item>
+          <Form.Item name="userAccount" label="账号" rules={[{ required: true, message: '账户不能为空' }]}>
+            <Input placeholder="请输入账号" />
+          </Form.Item>
+          <Form.Item name="userPassword" label="密码" rules={[{ required: true, message: '密码不能为空' }, {min:8, message:'密码最小要8位'}]}>
+            <Input.Password placeholder="请输入密码" />
+          </Form.Item>
+          <Form.Item name="planetCode" label="星球编号" rules={[{ required: true, message: '星球编号不能为空' }, {max:5, message:'不能超过5位'}]}>
+            <Input.Password placeholder="请输入星球编号" />
+          </Form.Item>
+        </Form>
+      </Modal>
     <ProTable<API.CurrentUser>
       columns={columns}
       actionRef={actionRef}
       cardBordered
+      dataSource={tableData}
       request={async (params = {}, sort, filter) => {
         console.log(sort, filter);
         const userList = await searchUsers();
@@ -179,5 +250,6 @@ export default () => {
       headerTitle="高级表格"
 
     />
+    </>
   );
 };
