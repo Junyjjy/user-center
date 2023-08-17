@@ -16,6 +16,7 @@ export type HeaderSearchProps = {
   options: AutoCompleteProps['options'];
   defaultVisible?: boolean;
   visible?: boolean;
+
   defaultValue?: string;
   value?: string;
 };

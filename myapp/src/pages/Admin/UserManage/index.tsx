@@ -178,6 +178,15 @@ export default () => {
     setTableData(newDatas)
   }
 
+  /*------------------  删除用户弹窗相关  ---------------- */
+  const [delateModalOpen,setDelateModalOpen] = useState(Boolean)
+  const openDelateUserModal = () => {
+    setDelateModalOpen(true)
+  }
+  const [delateUserForm] = useForm()
+
+
+
   return (
     <>
       <div><Button onClick={openNewUserModal}>新增</Button></div>
@@ -198,6 +207,16 @@ export default () => {
           </Form.Item>
         </Form>
       </Modal>
+
+      {/* 用户删除弹窗 */}
+
+      {/*<div><Button onClick={openDelateUserModal}>删除</Button></div>*/}
+      {/*<Modal title="删除用户" open={delateModalOpen}>*/}
+      {/*  <Form form={delateUserForm}>*/}
+
+      {/*  </Form>*/}
+      {/*</Modal>*/}
+
     <ProTable<API.CurrentUser>
       columns={columns}
       actionRef={actionRef}
