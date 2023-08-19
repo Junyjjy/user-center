@@ -2,8 +2,9 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {ProTable, TableDropdown} from '@ant-design/pro-components';
 import {useRef, useState} from 'react';
 import {register, searchUsers} from "@/services/ant-design-pro/api";
-import {Button, Form, Image, Input, Modal} from "antd";
+import {Button, Form, Image, Input, message, Modal, Popconfirm} from "antd";
 import {useForm} from "antd/es/form/Form";
+
 export const waitTimePromise = async (time: number = 100) => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -179,11 +180,48 @@ export default () => {
   }
 
   /*------------------  删除用户弹窗相关  ---------------- */
-  const [delateModalOpen,setDelateModalOpen] = useState(Boolean)
-  const openDelateUserModal = () => {
-    setDelateModalOpen(true)
+  const [deleteModalOpen,setDeleteModalOpen] = useState(Boolean)
+  const [confirmDeleteModel,setConfirmDeleteModel] = useState(Boolean)
+
+    const openDeleteUserModal = () => {
+    setDeleteModalOpen(true)
   }
-  const [delateUserForm] = useForm()
+  // const [deleteUserForm] = useForm()
+
+  const handleCancelDeleteUser = () => {
+    setDeleteModalOpen(false)
+  }
+
+
+  const [inputValue,setInputValue] = useState()
+
+  const handleOkDeleteUser = () => {
+    // setConfirmDeleteModel(true);
+    // if (inputValue == null) {
+    //   alert("删除账号不能为空");
+    //   setConfirmDeleteModel(false);
+    // }
+
+
+    if (inputValue == null) {
+      alert("删除账号不能为空");
+    } else {
+      setConfirmDeleteModel(true);
+    }
+
+  }
+
+  const handleOkConfirmDelete = () => {
+    setConfirmDeleteModel(false)
+  }
+  const handleCancelConfirmDelete = () => {
+    setConfirmDeleteModel(false)
+  }
+
+  const deleteUserInput = (e: any) =>{
+    setInputValue(e.target.value);
+  }
+
 
 
 
@@ -208,14 +246,19 @@ export default () => {
         </Form>
       </Modal>
 
-      {/* 用户删除弹窗 */}
+      {/*-------------------- 用户删除弹窗 ---------------------*/}
 
-      {/*<div><Button onClick={openDelateUserModal}>删除</Button></div>*/}
-      {/*<Modal title="删除用户" open={delateModalOpen}>*/}
-      {/*  <Form form={delateUserForm}>*/}
+      <div><Button onClick={openDeleteUserModal}>删除</Button></div>
+      <Modal title="删除用户" open={deleteModalOpen} onCancel={handleCancelDeleteUser} onOk={handleOkDeleteUser}>
+        <div><p>所需删除的用户：</p>
+          <Input onPressEnter={handleOkDeleteUser}
+                 value={inputValue}
+                 onChange={deleteUserInput}/></div>
+      </Modal>
 
-      {/*  </Form>*/}
-      {/*</Modal>*/}
+        <Modal title="是否删除该用户？"
+               open={confirmDeleteModel}
+               onOk={handleOkConfirmDelete} onCancel={handleCancelConfirmDelete}></Modal>
 
     <ProTable<API.CurrentUser>
       columns={columns}
